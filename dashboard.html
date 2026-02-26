@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SURXRAT - Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-black: #0a0000;
+            --bg-dark: #110000;
+            --bg-card: #1a0a0a;
+            --bg-card2: #140808;
+            --accent-red: #e8002d;
+            --accent-red-soft: rgba(232, 0, 45, 0.18);
+            --accent-green: #00c853;
+            --accent-green-soft: rgba(0, 200, 83, 0.15);
+            --text-white: #f0e8e8;
+            --text-muted: #7a5555;
+            --text-sub: #b08080;
+            --border-card: rgba(232, 0, 45, 0.08);
+            --border-active: rgba(232, 0, 45, 0.35);
+            --offline-gray: #555;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100%;
+            background: var(--bg-black);
+            color: var(--text-white);
+            font-family: 'Rajdhani', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Ambient glow bg */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 50% 0%, rgba(180,0,30,0.22) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 50% at 20% 80%, rgba(120,0,20,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 80% 60%, rgba(80,0,10,0.12) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ===== WRAPPER ===== */
+        .app-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 80px;
+        }
+
+        /* ===== TOPBAR ===== */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 18px 14px;
+            background: linear-gradient(180deg, rgba(25,5,5,0.95) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .logo-text {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--text-white);
+        }
+
+        .logo-text span {
+            color: var(--accent-red);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .total-badge {
+            position: relative;
+            width: 38px;
+            height: 38px;
+            background: rgba(18, 5, 5, 0.8);
+            border: 1px solid var(--border-active);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-white);
+        }
+
+        .total-badge::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            border: 1.5px solid var(--bg-black);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ===== SECTION TITLE ===== */
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            padding: 0 18px 12px;
+            text-transform: uppercase;
+        }
+
+        /* ===== FILTER TABS ===== */
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            padding: 0 18px 18px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .filter-row::-webkit-scrollbar { display: none; }
+
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border-radius: 50px;
+            border: 1.5px solid rgba(255,255,255,0.1);
+            background: transparent;
+            color: var(--text-sub);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .filter-btn .count {
+            background: rgba(255,255,255,0.1);
+            color: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 1px 7px;
+            border-radius: 20px;
+        }
+
+        .filter-btn.active {
+            background: var(--accent-red);
+            border-color: var(--accent-red);
+            color: #fff;
+        }
+
+        .filter-btn.active .count {
+            background: rgba(255,255,255,0.25);
+            color: #fff;
+        }
+
+        .filter-btn:not(.active):hover {
+            border-color: rgba(232,0,45,0.4);
+            color: var(--text-white);
+        }
+
+        /* ===== DEVICE CARDS ===== */
+        .device-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 0 14px;
+        }
+
+        .device-card {
+            background: linear-gradient(135deg, #1e0a0a 0%, #160606 100%);
+            border: 1px solid var(--border-card);
+            border-radius: 16px;
+            padding: 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .device-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            border-radius: 3px 0 0 3px;
+        }
+
+        .device-card.online::before {
+            background: var(--accent-red);
+        }
+
+        .device-card.offline::before {
+            background: transparent;
+        }
+
+        /* top red dot indicator */
+        .device-card .dot-indicator {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .device-card.online .dot-indicator {
+            background: var(--accent-red);
+            box-shadow: 0 0 6px var(--accent-red);
+        }
+
+        .device-card.offline .dot-indicator {
+            background: transparent;
+        }
+
+        .device-card:active {
+            transform: scale(0.98);
+        }
+
+        .device-card:hover {
+            border-color: var(--border-active);
+        }
+
+        .card-inner {
+            padding: 14px 16px 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        /* Phone icon box */
+        .phone-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .device-card.online .phone-icon-box {
+            background: rgba(180, 0, 30, 0.25);
+            border: 1px solid rgba(232, 0, 45, 0.3);
+        }
+
+        .device-card.offline .phone-icon-box {
+            background: rgba(50, 20, 20, 0.4);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .phone-icon-box svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .device-card.online .phone-icon-box svg { color: var(--accent-red); }
+        .device-card.offline .phone-icon-box svg { color: var(--text-muted); }
+
+        /* Star */
+        .fav-star {
+            position: absolute;
+            top: 14px;
+            left: 20px;
+            font-size: 15px;
+            color: rgba(255,255,255,0.15);
+            cursor: pointer;
+            z-index: 2;
+            transition: 0.2s;
+            line-height: 1;
+        }
+
+        .fav-star.active { color: #ffd700; }
+        .fav-star:hover { color: #ffd700; }
+
+        /* card info */
+        .card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .card-device-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-white);
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+            text-transform: uppercase;
+        }
+
+        .card-device-sub {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-top: 2px;
+            letter-spacing: 0.3px;
+        }
+
+        .card-device-ip {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* Status pill */
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+
+        .status-pill.online {
+            background: rgba(0, 200, 83, 0.15);
+            border: 1.5px solid rgba(0, 200, 83, 0.4);
+            color: var(--accent-green);
+        }
+
+        .status-pill.offline {
+            background: rgba(60, 60, 60, 0.3);
+            border: 1.5px solid rgba(100,100,100,0.3);
+            color: var(--offline-gray);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-pill.online .status-dot {
+            background: var(--accent-green);
+            box-shadow: 0 0 4px var(--accent-green);
+            animation: blink 1.5s infinite;
+        }
+
+        .status-pill.offline .status-dot {
+            background: var(--offline-gray);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background: rgba(12, 3, 3, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(232, 0, 45, 0.12);
+            display: flex;
+            z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        .nav-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 0 10px;
+            cursor: pointer;
+            gap: 4px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .nav-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .nav-btn.active {
+            color: var(--accent-red);
+        }
+
+        .nav-btn.active svg {
+            filter: drop-shadow(0 0 4px rgba(232,0,45,0.6));
+        }
+
+        /* ===== SIDEBAR (DESKTOP) ===== */
+        @media (min-width: 720px) {
+            body { display: flex; }
+
+            .sidebar-desktop {
+                width: 280px;
+                min-height: 100vh;
+                background: rgba(15, 3, 3, 0.98);
+                border-right: 1px solid var(--border-active);
+                padding: 24px 18px;
+                display: flex;
+                flex-direction: column;
+                gap: 18px;
+                position: fixed;
+                height: 100vh;
+                overflow-y: auto;
+                z-index: 200;
+            }
+
+            .app-wrapper {
+                margin-left: 280px;
+                max-width: none;
+                flex: 1;
+            }
+
+            .bottom-nav {
+                display: none;
+            }
+        }
+
+        @media (max-width: 719px) {
+            .sidebar-desktop { display: none; }
+        }
+
+        /* SIDEBAR STYLES */
+        .sidebar-logo-area {
+            text-align: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-active);
+        }
+
+        .sidebar-logo-area .logo-text {
+            font-size: 28px;
+        }
+
+        .sidebar-logo-area p {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* User box sidebar */
+        .sidebar-user-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .user-avatar-circle {
+            width: 56px;
+            height: 56px;
+            background: var(--accent-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 22px;
+            font-weight: 700;
+            color: white;
+            border: 2px solid rgba(255,120,120,0.4);
+        }
+
+        .sidebar-username {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-white);
+        }
+
+        .sidebar-email {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin: 3px 0;
+        }
+
+        .sidebar-exp {
+            font-size: 10px;
+            color: #ff9f3b;
+            background: rgba(255,159,59,0.12);
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            border: 1px solid rgba(255,159,59,0.25);
+            margin-top: 5px;
+        }
+
+        /* Stats sidebar */
+        .sidebar-stats {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 14px;
+            padding: 14px 16px;
+        }
+
+        .sidebar-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 0;
+        }
+
+        .sidebar-stat-row:not(:last-child) {
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .sidebar-stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .sidebar-stat-val {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .sidebar-stat-val.c-total { color: #ff9f3b; }
+        .sidebar-stat-val.c-online { color: var(--accent-green); }
+        .sidebar-stat-val.c-offline { color: var(--accent-red); }
+        .sidebar-stat-val.c-fav { color: #ffd700; }
+
+        /* API key sidebar */
+        .sidebar-api {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 14px;
+            padding: 14px 16px;
+        }
+
+        .sidebar-api-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #ff9f3b;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .api-key-display {
+            background: rgba(0,0,0,0.4);
+            border: 1px dashed rgba(255,159,59,0.4);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            color: #ff9f3b;
+            word-break: break-all;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .btn-copy {
+            width: 100%;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-white);
+            padding: 9px;
+            border-radius: 10px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .btn-copy:hover {
+            background: #ff9f3b;
+            border-color: #ff9f3b;
+            color: #000;
+        }
+
+        /* Logout */
+        .btn-logout {
+            margin-top: auto;
+            width: 100%;
+            background: transparent;
+            border: 1px solid rgba(232,0,45,0.4);
+            color: var(--text-white);
+            padding: 11px;
+            border-radius: 12px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-logout:hover {
+            background: var(--accent-red);
+            border-color: var(--accent-red);
+        }
+
+        /* Realtime badge */
+        .realtime-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 200, 83, 0.1);
+            border: 1px solid rgba(0,200,83,0.3);
+            color: var(--accent-green);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 4px 12px;
+            border-radius: 30px;
+        }
+
+        .realtime-badge .rt-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: blink 1.2s infinite;
+        }
+
+        /* Chat sidebar */
+        .sidebar-chat {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 14px;
+            padding: 14px 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 160px;
+        }
+
+        .sidebar-chat-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-red);
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .chat-messages-area {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,0,0,0.2) transparent;
+        }
+
+        .chat-msg {
+            display: flex;
+        }
+
+        .chat-msg.sent { justify-content: flex-end; }
+
+        .chat-bubble {
+            max-width: 82%;
+            padding: 7px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: white;
+        }
+
+        .chat-msg.received .chat-bubble {
+            background: rgba(50,20,20,0.7);
+            border-bottom-left-radius: 3px;
+        }
+
+        .chat-msg.sent .chat-bubble {
+            background: var(--accent-red);
+            border-bottom-right-radius: 3px;
+        }
+
+        .chat-time {
+            font-size: 8px;
+            color: rgba(255,255,255,0.4);
+            text-align: right;
+            margin-top: 3px;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        .chat-text-input {
+            flex: 1;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 12px;
+            outline: none;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .chat-text-input:focus { border-color: var(--accent-red); }
+
+        .chat-send-btn {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-red);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(20,5,5,0.95);
+            border: 1px solid var(--accent-red);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 999;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Connection status overlay */
+        .conn-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5,0,0,0.92);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            gap: 18px;
+        }
+
+        .conn-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(232,0,45,0.2);
+            border-top-color: var(--accent-red);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .conn-text {
+            font-size: 13px;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR DESKTOP ===== -->
+<div class="sidebar-desktop" id="sidebarDesktop">
+    <div class="sidebar-logo-area">
+        <div class="logo-text">SURX<span>RAT</span></div>
+        <p>PREMIUM EDITION</p>
+    </div>
+
+    <div class="sidebar-user-box">
+        <div class="user-avatar-circle" id="sdAvatar">U</div>
+        <div class="sidebar-username" id="sdUsername">Loading...</div>
+        <div class="sidebar-email" id="sdEmail">—</div>
+        <div class="sidebar-exp" id="sdExp">Exp: —</div>
+    </div>
+
+    <div class="sidebar-api">
+        <div class="sidebar-api-title">🔑 API KEY</div>
+        <div class="api-key-display" id="sdApiKey">LOADING...</div>
+        <button class="btn-copy" onclick="copyApiKey()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            COPY KEY
+        </button>
+    </div>
+
+    <div class="sidebar-stats">
+        <div class="sidebar-stat-row">
+            <span class="sidebar-stat-label">Total Device</span>
+            <span class="sidebar-stat-val c-total" id="sdTotal">0</span>
+        </div>
+        <div class="sidebar-stat-row">
+            <span class="sidebar-stat-label">Online</span>
+            <span class="sidebar-stat-val c-online" id="sdOnline">0</span>
+        </div>
+        <div class="sidebar-stat-row">
+            <span class="sidebar-stat-label">Offline</span>
+            <span class="sidebar-stat-val c-offline" id="sdOffline">0</span>
+        </div>
+        <div class="sidebar-stat-row">
+            <span class="sidebar-stat-label">Favorit</span>
+            <span class="sidebar-stat-val c-fav" id="sdFav">0</span>
+        </div>
+    </div>
+
+    <div class="sidebar-chat">
+        <div class="sidebar-chat-title">💬 CUSTOMER SERVICE</div>
+        <div class="chat-messages-area" id="sdChatMessages"></div>
+        <div class="chat-input-row">
+            <input type="text" class="chat-text-input" id="sdChatInput" placeholder="Ketik pesan...">
+            <button class="chat-send-btn" onclick="sendChat()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <button class="btn-logout" onclick="logout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        LOGOUT
+    </button>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div class="app-wrapper">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="logo-text">SURX<span>RAT</span></div>
+        <div class="topbar-right">
+            <div class="realtime-badge" id="realtimeBadge">
+                <div class="rt-dot"></div>
+                <span>LIVE</span>
+            </div>
+            <div class="total-badge" id="totalBadge">0</div>
+        </div>
+    </div>
+
+    <!-- SECTION LABEL -->
+    <div class="section-label">Perangkat Terhubung</div>
+
+    <!-- FILTER TABS -->
+    <div class="filter-row">
+        <button class="filter-btn active" id="filterAll" onclick="setFilter('all')">
+            SEMUA <span class="count" id="countAll">0</span>
+        </button>
+        <button class="filter-btn" id="filterOnline" onclick="setFilter('online')">
+            ONLINE <span class="count" id="countOnline">0</span>
+        </button>
+        <button class="filter-btn" id="filterOffline" onclick="setFilter('offline')">
+            OFFLINE <span class="count" id="countOffline">0</span>
+        </button>
+        <button class="filter-btn" id="filterFav" onclick="setFilter('favorite')">
+            FAVORIT <span class="count" id="countFav">0</span>
+        </button>
+    </div>
+
+    <!-- DEVICE LIST -->
+    <div class="device-list" id="deviceList">
+        <!-- filled by JS -->
+    </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <button class="nav-btn active" onclick="navTo('beranda')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        BERANDA
+    </button>
+    <button class="nav-btn" onclick="navTo('profil')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        PROFIL
+    </button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastEl"></div>
+
+<!-- CONNECTION OVERLAY -->
+<div class="conn-overlay" id="connOverlay">
+    <div class="conn-spinner"></div>
+    <div class="conn-text">MENGHUBUNGKAN...</div>
+</div>
+
+<script>
+// ============================================================
+// SURXRAT DASHBOARD — FULL BACKEND INTEGRATION
+// ============================================================
+
+let socket = null;
+let currentUser = null;
+let devices = [];
+let activeFilter = 'all';
+let reconnectTimer = null;
+let isAuth = false;
+
+// ─── SESSION CHECK ───────────────────────────────────────────
+function checkSession() {
+    const raw = localStorage.getItem('session');
+    if (!raw) { redirect('index.html'); return null; }
+
+    try {
+        const sess = JSON.parse(raw);
+        if (new Date() > new Date(sess.expired)) {
+            localStorage.removeItem('session');
+            redirect('index.html?error=expired');
+            return null;
+        }
+        currentUser = sess;
+        loadUserUI(sess);
+        return sess;
+    } catch(e) {
+        localStorage.removeItem('session');
+        redirect('index.html');
+        return null;
+    }
+}
+
+function loadUserUI(u) {
+    const uname = u.username || 'User';
+    const email = u.email || '—';
+    const exp   = u.expired || '—';
+    const api   = generateApiKey(u);
+
+    // sidebar desktop
+    setEl('sdAvatar',   uname.charAt(0).toUpperCase());
+    setEl('sdUsername', uname);
+    setEl('sdEmail',    email);
+    setEl('sdExp',      `Exp: ${exp}`);
+    setEl('sdApiKey',   api);
+
+    // Store api key for copy
+    window._apiKey = api;
+}
+
+// ─── API KEY ─────────────────────────────────────────────────
+function generateApiKey({ email = '', expired = '2026' } = {}) {
+    const raw  = btoa(email + expired).replace(/[^A-Z0-9]/gi,'').toUpperCase();
+    const seg  = (s,e) => raw.padEnd(16,'X').substring(s,e);
+    return `SURX-${seg(0,4)}-${seg(4,8)}-${seg(8,12)}`;
+}
+
+function copyApiKey() {
+    const key = window._apiKey || document.getElementById('sdApiKey')?.textContent || '';
+    navigator.clipboard.writeText(key).then(() => {
+        showToast('✅ API Key disalin!');
+    }).catch(() => {
+        showToast('❌ Gagal menyalin');
+    });
+}
+
+// ─── WEBSOCKET ───────────────────────────────────────────────
+function connectWebSocket() {
+    if (socket && socket.readyState === WebSocket.OPEN) return;
+
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const url   = `${proto}//${location.host}`;
+
+    try {
+        socket = new WebSocket(url);
+    } catch(e) {
+        console.warn('WS init failed, using demo data');
+        hideOverlay();
+        loadDemoDevices();
+        return;
+    }
+
+    socket.onopen = () => {
+        console.log('[WS] Connected');
+        clearTimeout(reconnectTimer);
+        if (currentUser) {
+            socket.send(JSON.stringify({
+                type: 'auth',
+                email: currentUser.email,
+                token: currentUser.sessionToken,
+                deviceId: getClientId()
+            }));
+        }
+    };
+
+    socket.onmessage = (ev) => {
+        try { handleMessage(JSON.parse(ev.data)); }
+        catch(e) { console.error('[WS] Parse error', e); }
+    };
+
+    socket.onclose = () => {
+        console.log('[WS] Disconnected');
+        updateRealtimeBadge(false);
+        reconnectTimer = setTimeout(connectWebSocket, 4000);
+    };
+
+    socket.onerror = () => {
+        console.warn('[WS] Error — falling back to demo');
+        hideOverlay();
+        loadDemoDevices();
+    };
+}
+
+// ─── MESSAGE HANDLER ─────────────────────────────────────────
+function handleMessage(data) {
+    switch(data.type) {
+
+        case 'auth_success':
+            isAuth = true;
+            hideOverlay();
+            updateRealtimeBadge(true);
+            showToast('✅ Terautentikasi');
+            break;
+
+        case 'auth_failed':
+            localStorage.removeItem('session');
+            redirect('index.html?error=auth');
+            break;
+
+        case 'devices_update':
+            devices = data.devices || [];
+            refreshUI();
+            break;
+
+        case 'device_status':
+            // Single device status change
+            const d = devices.find(x => x.id === data.id);
+            if (d) {
+                d.status = data.status;
+                refreshUI();
+            }
+            break;
+
+        case 'stats_update':
+            updateStatBadges(data.stats);
+            break;
+
+        case 'chat_message':
+            appendChatMsg(data.message, data.sender, data.time, 'received');
+            break;
+
+        case 'ping':
+            sendWS({ type: 'pong' });
+            break;
+    }
+}
+
+// ─── SEND WS ─────────────────────────────────────────────────
+function sendWS(obj) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(obj));
+    }
+}
+
+// ─── DEMO DATA (fallback) ─────────────────────────────────────
+function loadDemoDevices() {
+    devices = [
+        {
+            id: 'dev1',
+            name: 'REALME RMX3939',
+            android: '15',
+            country: 'INDONESIA',
+            ip: '192.168.43.47',
+            status: 'ONLINE',
+            battery: 22,
+            favorite: false
+        },
+        {
+            id: 'dev2',
+            name: 'REDMI 23053RN02A',
+            android: '15',
+            country: 'INDONESIA',
+            ip: '192.168.1.7',
+            status: 'OFFLINE',
+            battery: 68,
+            favorite: false
+        }
+    ];
+    refreshUI();
+}
+
+// ─── FILTER ──────────────────────────────────────────────────
+function setFilter(f) {
+    activeFilter = f;
+    ['all','online','offline','favorite'].forEach(id => {
+        const el = document.getElementById('filter' + capitalize(id));
+        if (el) el.classList.toggle('active', id === f);
+    });
+    renderDevices();
+}
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+// ─── REFRESH UI ──────────────────────────────────────────────
+function refreshUI() {
+    const online  = devices.filter(d => d.status === 'ONLINE').length;
+    const offline = devices.filter(d => d.status === 'OFFLINE').length;
+    const fav     = devices.filter(d => d.favorite).length;
+    const total   = devices.length;
+
+    // Topbar badge
+    setEl('totalBadge', total);
+
+    // Filter counts
+    setEl('countAll',     total);
+    setEl('countOnline',  online);
+    setEl('countOffline', offline);
+    setEl('countFav',     fav);
+
+    // Sidebar stats
+    setEl('sdTotal',  total);
+    setEl('sdOnline', online);
+    setEl('sdOffline',offline);
+    setEl('sdFav',    fav);
+
+    renderDevices();
+}
+
+// ─── RENDER DEVICE CARDS ─────────────────────────────────────
+function renderDevices() {
+    const list = document.getElementById('deviceList');
+    if (!list) return;
+
+    let filtered = [...devices];
+    if (activeFilter === 'online')   filtered = filtered.filter(d => d.status === 'ONLINE');
+    if (activeFilter === 'offline')  filtered = filtered.filter(d => d.status === 'OFFLINE');
+    if (activeFilter === 'favorite') filtered = filtered.filter(d => d.favorite);
+
+    if (filtered.length === 0) {
+        list.innerHTML = `
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="5" y="2" width="14" height="20" rx="2"/>
+                    <line x1="12" y1="18" x2="12" y2="18.01"/>
+                </svg>
+                <p>TIDAK ADA PERANGKAT</p>
+            </div>`;
+        return;
+    }
+
+    list.innerHTML = filtered.map(dev => buildCard(dev)).join('');
+}
+
+function buildCard(dev) {
+    const cls   = dev.status === 'ONLINE' ? 'online' : 'offline';
+    const pill  = dev.status === 'ONLINE'
+        ? `<span class="status-pill online"><span class="status-dot"></span>ONLINE</span>`
+        : `<span class="status-pill offline"><span class="status-dot"></span>OFFLINE</span>`;
+    const star  = dev.favorite ? 'active' : '';
+    const phoneClr = dev.status === 'ONLINE' ? '#e8002d' : '#555555';
+
+    return `
+    <div class="device-card ${cls}" onclick="openDevice('${dev.id}')">
+        <div class="dot-indicator"></div>
+        <div class="card-inner">
+            <span class="fav-star ${star}" onclick="toggleFav(event,'${dev.id}')">☆</span>
+            <div class="phone-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="${phoneClr}" stroke-width="2" stroke-linecap="round">
+                    <rect x="5" y="2" width="14" height="20" rx="2"/>
+                    <line x1="12" y1="18" x2="12" y2="18.01" stroke-width="2.5"/>
+                </svg>
+            </div>
+            <div class="card-info">
+                <div class="card-device-name">${escHtml(dev.name)} ANDROID ${escHtml(String(dev.android || ''))}</div>
+                <div class="card-device-sub">${escHtml(dev.country || 'INDONESIA')}</div>
+                <div class="card-device-ip">${escHtml(dev.ip || '')}</div>
+            </div>
+            ${pill}
+        </div>
+    </div>`;
+}
+
+// ─── TOGGLE FAVORITE ─────────────────────────────────────────
+function toggleFav(e, id) {
+    e.stopPropagation();
+    const dev = devices.find(d => d.id === id);
+    if (!dev) return;
+    dev.favorite = !dev.favorite;
+
+    sendWS({ type: 'toggle_favorite', id, favorite: dev.favorite });
+    refreshUI();
+    showToast(dev.favorite ? '⭐ Ditambah ke Favorit' : '☆ Dihapus dari Favorit');
+}
+
+// ─── SELECT DEVICE ───────────────────────────────────────────
+function openDevice(id) {
+    localStorage.setItem('selectedDevice', id);
+    window.location.href = 'device-control.html';
+}
+
+// ─── CHAT ────────────────────────────────────────────────────
+function sendChat() {
+    const inp = document.getElementById('sdChatInput');
+    if (!inp) return;
+    const msg = inp.value.trim();
+    if (!msg) return;
+
+    const t = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    sendWS({ type: 'chat', message: msg, sender: currentUser?.email || 'user' });
+    appendChatMsg(msg, 'me', t, 'sent');
+    inp.value = '';
+}
+
+function appendChatMsg(text, sender, time, dir) {
+    const area = document.getElementById('sdChatMessages');
+    if (!area) return;
+    const t = time || new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    area.innerHTML += `
+        <div class="chat-msg ${dir}">
+            <div class="chat-bubble">
+                ${escHtml(text)}
+                <div class="chat-time">${t}</div>
+            </div>
+        </div>`;
+    area.scrollTop = area.scrollHeight;
+}
+
+// ─── REALTIME BADGE ──────────────────────────────────────────
+function updateRealtimeBadge(live) {
+    const el = document.getElementById('realtimeBadge');
+    if (!el) return;
+    el.innerHTML = live
+        ? `<div class="rt-dot"></div><span>LIVE</span>`
+        : `<span style="color:var(--text-muted)">OFFLINE</span>`;
+    el.style.borderColor = live ? 'rgba(0,200,83,0.3)' : 'rgba(255,255,255,0.06)';
+}
+
+function updateStatBadges(stats) {
+    if (!stats) return;
+    setEl('sdTotal',  stats.total   || 0);
+    setEl('sdOnline', stats.online  || 0);
+    setEl('sdOffline',stats.offline || 0);
+    setEl('totalBadge', stats.total || 0);
+    setEl('countAll',   stats.total || 0);
+    setEl('countOnline',  stats.online  || 0);
+    setEl('countOffline', stats.offline || 0);
+}
+
+// ─── LOGOUT ──────────────────────────────────────────────────
+function logout() {
+    sendWS({ type: 'logout', email: currentUser?.email, token: currentUser?.sessionToken });
+    localStorage.removeItem('session');
+    redirect('index.html');
+}
+
+// ─── NAV ─────────────────────────────────────────────────────
+function navTo(page) {
+    if (page === 'profil') redirect('profile.html');
+    // beranda = current page, no redirect
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────
+function setEl(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+}
+
+function redirect(url) { window.location.href = url; }
+
+function hideOverlay() {
+    const ov = document.getElementById('connOverlay');
+    if (ov) {
+        ov.style.transition = 'opacity 0.4s';
+        ov.style.opacity = '0';
+        setTimeout(() => ov.remove(), 400);
+    }
+}
+
+function showToast(msg, dur = 2000) {
+    const t = document.getElementById('toastEl');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function escHtml(str) {
+    return String(str)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;');
+}
+
+function getClientId() {
+    let id = localStorage.getItem('clientId');
+    if (!id) {
+        id = 'WEB_' + Math.random().toString(36).slice(2,10).toUpperCase() + '_' + Date.now();
+        localStorage.setItem('clientId', id);
+    }
+    return id;
+}
+
+// ─── ENTER KEY CHAT ──────────────────────────────────────────
+document.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && document.activeElement?.id === 'sdChatInput') {
+        sendChat();
+    }
+});
+
+// ─── INIT ────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+    const sess = checkSession();
+    if (!sess) return;
+
+    getClientId();
+
+    // Try real WebSocket, fallback to demo on error
+    try {
+        connectWebSocket();
+        // Show demo data after 2s if backend not responding
+        setTimeout(() => {
+            const ov = document.getElementById('connOverlay');
+            if (ov && ov.style.opacity !== '0') {
+                hideOverlay();
+                loadDemoDevices();
+                updateRealtimeBadge(false);
+            }
+        }, 2500);
+    } catch(e) {
+        hideOverlay();
+        loadDemoDevices();
+    }
+});
+</script>
+</body>
+</html>
